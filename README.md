@@ -24,6 +24,7 @@ SQLite local.
 ```
 ├── README.md            você está aqui
 ├── GUIA_ALUNO.md        o que vamos ver na oficina + checklist de code review
+├── gabarito/            o backend depois das 10 correções
 └── sistema/
     ├── backend/
     │   ├── main.py      ← a API. É aqui que estão os problemas.
