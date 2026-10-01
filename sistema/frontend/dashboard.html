@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SECCO Internal — Dashboard</title>
+    <link rel="icon" href="secco-symbol.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="topbar"></div>
+
+    <script src="app.js"></script>
+    <script>
+      requireToken();
+      const body = renderTopbar("dashboard");
+
+      (async () => {
+        const { ok, data } = await api("/api/me");
+
+        if (!ok || !data) {
+          body.innerHTML = '<div class="empty">Não foi possível carregar seu perfil.</div>';
+          return;
+        }
+
+        const user = data.user || data;
+
+        body.innerHTML = `
+          <div class="page-header">
+            <span class="eyebrow">SECCO Internal</span>
+            <h1>Olá, ${escapeHtml((user.name || "").split(" ")[0])}.</h1>
+            <p class="muted">Visão geral da sua conta.</p>
+          </div>
+
+          <div class="stack">
+            <section class="card">
+              <h2>Perfil</h2>
+              <dl class="detail">
+                <dt>Nome</dt><dd>${escapeHtml(user.name)}</dd>
+                <dt>Email</dt><dd class="mono">${escapeHtml(user.email)}</dd>
+                <dt>Cargo</dt><dd>${roleBadge(user.role)}</dd>
+                <dt>Status</dt><dd>${statusBadge(user.status)}</dd>
+                <dt>Departamento</dt><dd>${escapeHtml(user.department || "—")}</dd>
+              </dl>
+            </section>
+
+            <div class="grid">
+              <a class="card card-link" href="users.html">
+                <h3>Usuários</h3>
+                <p class="muted">Consultar o diretório interno da equipe.</p>
+              </a>
+              <a class="card card-link" href="admin.html">
+                <h3>Administração</h3>
+                <p class="muted">Métricas da conta e licenças contratadas.</p>
+              </a>
+            </div>
+          </div>
+
+          <p class="lab-note">Bug Hunt Lab — ambiente de desenvolvimento</p>
+        `;
+      })();
+    </script>
+  </body>
+</html>

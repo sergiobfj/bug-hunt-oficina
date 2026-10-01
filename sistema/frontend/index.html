@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SECCO Internal — Acesso</title>
+    <link rel="icon" href="secco-symbol.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="login-wrapper">
+      <section class="login-card" aria-labelledby="login-title">
+        <img class="login-logo" src="secco-logo.svg" alt="SECCO" />
+
+        <h1 id="login-title">SECCO Internal</h1>
+        <p class="muted login-lead">Acesse sua conta para continuar.</p>
+
+        <div id="alert" class="alert error" role="alert" hidden></div>
+
+        <form id="login-form" novalidate>
+          <div class="field">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              autocomplete="username"
+              placeholder="voce@secco.com"
+            />
+          </div>
+
+          <div class="field">
+            <label for="password">Senha</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              autocomplete="current-password"
+            />
+          </div>
+
+          <button type="submit" class="block" id="submit">Entrar</button>
+        </form>
+
+        <p class="login-footer">
+          <strong>Ambiente de treinamento · Bug Hunt Lab</strong>
+          Use as contas fictícias do README.
+        </p>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+    <script>
+      const form = document.getElementById("login-form");
+      const submit = document.getElementById("submit");
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        hideAlert();
+        submit.disabled = true;
+
+        const payload = {
+          email: document.getElementById("email").value,
+          password: document.getElementById("password").value,
+        };
+
+        try {
+          const response = await fetch("/api/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const data = await response.json();
+
+          if (response.ok && data.token) {
+            saveToken(data.token);
+            window.location.href = "dashboard.html";
+            return;
+          }
+
+          showAlert(data.error || data.detail || "Não foi possível entrar.");
+        } catch (error) {
+          showAlert("Erro de conexão com o servidor.");
+        } finally {
+          submit.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

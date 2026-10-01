@@ -1,0 +1,12 @@
+# Banco local — recriado automaticamente na primeira execução
+*.db
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Material de estudo pessoal — não versionar
+estudo/

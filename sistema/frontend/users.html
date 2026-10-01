@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SECCO Internal — Usuários</title>
+    <link rel="icon" href="secco-symbol.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="topbar"></div>
+
+    <script src="app.js"></script>
+    <script>
+      requireToken();
+      const body = renderTopbar("users");
+
+      body.innerHTML = `
+        <div class="page-header">
+          <span class="eyebrow">Diretório</span>
+          <h1>Usuários</h1>
+          <p class="muted">Busque por nome ou email.</p>
+        </div>
+
+        <form id="search-form" class="row" style="margin-bottom:24px">
+          <input
+            type="search"
+            id="q"
+            aria-label="Buscar usuários"
+            placeholder="Buscar por nome ou email"
+            style="flex:1;min-width:220px"
+          />
+          <button type="submit">Buscar</button>
+        </form>
+
+        <div id="alert" class="alert error" role="alert" hidden></div>
+
+        <section class="card table-card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Email</th>
+                  <th>Departamento</th>
+                  <th>Cargo</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="rows">
+                <tr><td colspan="5" class="empty">Carregando…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <p class="lab-note">Bug Hunt Lab — ambiente de desenvolvimento</p>
+      `;
+
+      const rows = document.getElementById("rows");
+
+      async function load(query) {
+        const path = query
+          ? "/api/users?q=" + encodeURIComponent(query)
+          : "/api/users";
+        const { ok, data } = await api(path);
+
+        if (!ok || !data || !Array.isArray(data.users)) {
+          showAlert((data && (data.error || data.detail)) || "Erro ao carregar usuários.");
+          rows.innerHTML = '<tr><td colspan="5" class="empty">Sem dados.</td></tr>';
+          return;
+        }
+
+        hideAlert();
+
+        if (data.users.length === 0) {
+          rows.innerHTML =
+            '<tr><td colspan="5" class="empty">Nenhum usuário encontrado.</td></tr>';
+          return;
+        }
+
+        rows.innerHTML = data.users
+          .map(
+            (user) => `
+              <tr>
+                <td data-label="Nome">${escapeHtml(user.name)}</td>
+                <td data-label="Email" class="mono">${escapeHtml(user.email)}</td>
+                <td data-label="Departamento">${escapeHtml(user.department || "—")}</td>
+                <td data-label="Cargo">${roleBadge(user.role)}</td>
+                <td data-label="Status">${statusBadge(user.status)}</td>
+              </tr>`
+          )
+          .join("");
+      }
+
+      document.getElementById("search-form").addEventListener("submit", (event) => {
+        event.preventDefault();
+        load(document.getElementById("q").value.trim());
+      });
+
+      load("");
+    </script>
+  </body>
+</html>

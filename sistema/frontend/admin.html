@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SECCO Internal — Administração</title>
+    <link rel="icon" href="secco-symbol.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="topbar"></div>
+
+    <script src="app.js"></script>
+    <script>
+      requireToken();
+      const body = renderTopbar("admin");
+
+      body.innerHTML = `
+        <div class="page-header">
+          <span class="eyebrow">Área restrita</span>
+          <h1>Administração</h1>
+          <p class="muted">Métricas da conta SECCO Internal.</p>
+        </div>
+
+        <div id="alert" class="alert error" role="alert" hidden></div>
+        <div id="content"></div>
+
+        <p class="lab-note">Bug Hunt Lab — ambiente de desenvolvimento</p>
+      `;
+
+      const content = document.getElementById("content");
+
+      (async () => {
+        const { ok, status, data } = await api("/api/admin/stats");
+
+        if (!ok) {
+          content.innerHTML = "";
+          showAlert(
+            status === 403
+              ? "Seu usuário não tem permissão para acessar esta área."
+              : (data && (data.error || data.detail)) || "Erro ao carregar métricas."
+          );
+          return;
+        }
+
+        hideAlert();
+
+        content.innerHTML = `
+          <div class="grid">
+            <div class="card">
+              <span class="eyebrow">Usuários cadastrados</span>
+              <span class="stat">${escapeHtml(data.total_users)}</span>
+            </div>
+            <div class="card">
+              <span class="eyebrow">Usuários ativos</span>
+              <span class="stat">${escapeHtml(data.active_users)}</span>
+            </div>
+            <div class="card">
+              <span class="eyebrow">Administradores</span>
+              <span class="stat">${escapeHtml(data.admins)}</span>
+            </div>
+          </div>
+        `;
+      })();
+    </script>
+  </body>
+</html>
